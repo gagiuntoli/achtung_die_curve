@@ -4,6 +4,7 @@ from physics import \
     updated_visited, \
     init_random_velocities, \
     init_random_positions, \
+    init_actives, \
     update_position, \
     update_velocity, \
     update_actives
@@ -98,21 +99,23 @@ font = pygame.font.SysFont('freemono', size=28, bold=True)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-players = menu.show_players_counter(screen, clock, font)
-if players == None:
+num_of_players = menu.show_players_counter(screen, clock, font)
+if num_of_players == None:
     exit()
 
+players = menu.select_player_names(screen, clock, font, num_of_players)
+
 while True:
-    positions = init_random_positions(WIDTH, HEIGHT, players)
-    velocities = init_random_velocities(players, SPEED)
-    actives = [True for _ in range(players)]
+    positions = init_random_positions(WIDTH, HEIGHT, num_of_players)
+    velocities = init_random_velocities(num_of_players, SPEED)
+    actives = init_actives(num_of_players)
 
     visited = {}
     winner = run_game(positions, velocities, actives, visited)
     if winner == None:
         break
 
-    if not menu.show_winner(screen, clock, winner, font):
+    if not menu.show_winner(screen, clock, players[winner], font):
         break
 
 pygame.quit()

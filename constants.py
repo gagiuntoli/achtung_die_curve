@@ -1,4 +1,5 @@
 import pygame
+import string
 
 MINIMUM_PLAYERS = 2
 MAXIMUM_PLAYERS = 3
@@ -26,3 +27,5 @@ ROTATION_KEYS = [
     [pygame.K_m, pygame.K_k],
     [pygame.K_v, pygame.K_b]
 ]
+
+CHARACTERS = set(string.ascii_letters+string.digits+string.punctuation)
