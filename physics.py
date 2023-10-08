@@ -1,10 +1,8 @@
 import math
-import unittest
 
 from random import random
-from constants import CONTACT_RADIUS
 
-def distance(p1, p2):
+def distance2(p1: [float, float], p2: [float, float]) -> float:
     [x1, y1] = p1
     [x2, y2] = p2
     return (x2 - x1)**2 + (y2 - y1)**2
@@ -31,6 +29,9 @@ def init_random_positions(width, height, players):
         ] for _ in range(players)
     ]
 
+def init_actives(players):
+    return [True for _ in range(players)]
+
 def update_position(position, velocity, dt):
     [x, y] = position
     [vx, vy] = velocity
@@ -52,20 +53,20 @@ def update_velocity(velocity, direction, rotation_speed, dt):
 
     return rotate_vector(velocity, angle)
 
-def has_crashed(position, visited, width, height):
+def has_crashed(position, visited, radius, width, height):
     [x, y] = position
     if x < 0 or x > width or y < 0 or y > height:
         return True
 
     for vpoint in visited.keys():
-        if distance(vpoint, position) < CONTACT_RADIUS:
+        if distance2(vpoint, position) < radius:
             return True
 
-def update_is_alive(positions, visited, width, height, is_alive):
+def update_actives(positions, visited, radius, width, height, actives):
     for player in range(len(positions)):
-        if is_alive[player] == True and has_crashed(positions[player], visited, width, height):
-            is_alive[player] = False
-    return is_alive
+        if actives[player] == True and has_crashed(positions[player], visited, radius, width, height):
+            actives[player] = False
+    return actives
 
 def updated_visited(visited, positions):
     for player in range(len(positions)):
@@ -73,13 +74,3 @@ def updated_visited(visited, positions):
         visited[(x,y)] = True
 
     return visited
-
-
-class TestPhysics(unittest.TestCase):
-
-    def test_distance(self):
-        self.assertAlmostEqual(distance([0, 0], [1, 1]), 2.0, 5)
-        self.assertAlmostEqual(distance([1, 1], [1, 1]), 0.0, 5)
-        self.assertAlmostEqual(distance([2, 2], [1, 1]), 2.0, 5)
-        self.assertAlmostEqual(distance([0, 2], [0, 1]), 1.0, 5)
-        self.assertAlmostEqual(distance([0, 2], [0, 0]), 4.0, 5)

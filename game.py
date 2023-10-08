@@ -6,7 +6,7 @@ from physics import \
     init_random_positions, \
     update_position, \
     update_velocity, \
-    update_is_alive
+    update_actives
 
 from constants import \
     LINE_WIDTH, \
@@ -17,14 +17,15 @@ from constants import \
     ROTATION_SPEED, \
     DELTA_TIME, \
     ROTATION_KEYS, \
-    PLAYERS_COLORS
+    PLAYERS_COLORS, \
+    CONTACT_RADIUS
 
 from menu import menu
 
 def draw_line(screen, p1, p2, color):
     pygame.draw.line(screen, color, p1, p2, LINE_WIDTH)
 
-def compute_new_positions_and_velocities(positions, velocities, is_alive):
+def compute_new_positions_and_velocities(positions, velocities, actives):
     keys = pygame.key.get_pressed()
 
     new_positions = []
@@ -41,7 +42,7 @@ def compute_new_positions_and_velocities(positions, velocities, is_alive):
         
         new_positions.append(update_position(positions[player], velocities[player], DELTA_TIME))
 
-        if is_alive[player]:
+        if actives[player]:
             new_velocities.append(update_velocity(velocities[player], direction, ROTATION_SPEED, DELTA_TIME))
         else:
             new_velocities.append([0.0, 0.0])
@@ -49,12 +50,12 @@ def compute_new_positions_and_velocities(positions, velocities, is_alive):
     assert(len(positions) == len(new_positions))
     assert(len(velocities) == len(new_velocities))
 
-    return new_positions, new_velocities, is_alive
+    return new_positions, new_velocities, actives
 
-def check_winner(is_alive):
-    if is_alive.count(True) == 1:
-        for player in range(len(is_alive)):
-            if is_alive[player]:
+def check_winner(actives):
+    if actives.count(True) == 1:
+        for player in range(len(actives)):
+            if actives[player]:
                 return player
     return None
 
@@ -64,7 +65,7 @@ def draw_new_paths(screen, old_positions, new_positions):
     for player in range(len(old_positions)):
         draw_line(screen, old_positions[player], new_positions[player], PLAYERS_COLORS[player])
 
-def run_game(positions, velocities, is_alive, visited):
+def run_game(positions, velocities, actives, visited):
     while True:
         visited = updated_visited(visited, positions)
 
@@ -72,14 +73,14 @@ def run_game(positions, velocities, is_alive, visited):
             if event.type == pygame.QUIT:
                 return None
 
-        new_positions, velocities, is_alive = compute_new_positions_and_velocities(positions, velocities, is_alive)
+        new_positions, velocities, actives = compute_new_positions_and_velocities(positions, velocities, actives)
 
         draw_new_paths(screen, positions, new_positions)
 
         positions = new_positions
-        is_alive = update_is_alive(positions, visited, WIDTH, HEIGHT, is_alive)
+        actives = update_actives(positions, visited, CONTACT_RADIUS, WIDTH, HEIGHT, actives)
 
-        winner = check_winner(is_alive)
+        winner = check_winner(actives)
         if winner != None:
             return winner
 
@@ -93,7 +94,7 @@ pygame.init()
 
 pygame.display.set_caption("Achtung die Curve!")
 
-font = pygame.font.SysFont('freemono', 28)
+font = pygame.font.SysFont('freemono', size=28, bold=True)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
@@ -104,10 +105,10 @@ if players == None:
 while True:
     positions = init_random_positions(WIDTH, HEIGHT, players)
     velocities = init_random_velocities(players, SPEED)
-    is_alive = [True for _ in range(players)]
+    actives = [True for _ in range(players)]
 
     visited = {}
-    winner = run_game(positions, velocities, is_alive, visited)
+    winner = run_game(positions, velocities, actives, visited)
     if winner == None:
         break
 
