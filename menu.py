@@ -37,40 +37,12 @@ class menu:
 
         return players
 
-    def ask_for_continuation(screen, clock, font):
-        screen.fill(BLACK)
-
-        img = font.render('Do you want to play again? Y/N', True, RED)
-        screen.blit(img, (20, 20))
-
-        pygame.display.flip()
-
-        running = True
-        answer = False
-
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_n:
-                        answer = False
-                        running = False
-                    elif event.key == pygame.K_y:
-                        answer = True
-                        running = False
-            clock.tick(FPS)
-
-        screen.fill(BLACK)
-
-        return answer
-
     def show_winner(screen, clock, winner, font):
-        pygame.draw.rect(screen, (GREEN), (300, 300, 500, 200))
-        screen.blit(font.render('Player '+ str(winner) + ' Won!', True, RED), (450, 380, 200, 100))
+        pygame.draw.rect(screen, (GREEN), (250, 300, 600, 200))
+        screen.blit(font.render('Player '+ str(winner) + ' Won!', True, RED), (300, 380))
         
         img = font.render('Do you want to play again? Y/N', True, RED)
-        screen.blit(img, (450, 420))
+        screen.blit(img, (300, 420))
 
         pygame.display.flip()
 

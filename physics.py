@@ -1,4 +1,5 @@
 import math
+import unittest
 
 from random import random
 from constants import CONTACT_RADIUS
@@ -72,3 +73,13 @@ def updated_visited(visited, positions):
         visited[(x,y)] = True
 
     return visited
+
+
+class TestPhysics(unittest.TestCase):
+
+    def test_distance(self):
+        self.assertAlmostEqual(distance([0, 0], [1, 1]), 2.0, 5)
+        self.assertAlmostEqual(distance([1, 1], [1, 1]), 0.0, 5)
+        self.assertAlmostEqual(distance([2, 2], [1, 1]), 2.0, 5)
+        self.assertAlmostEqual(distance([0, 2], [0, 1]), 1.0, 5)
+        self.assertAlmostEqual(distance([0, 2], [0, 0]), 4.0, 5)
