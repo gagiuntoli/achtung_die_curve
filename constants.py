@@ -1,3 +1,5 @@
+import pygame
+
 MINIMUM_PLAYERS = 2
 MAXIMUM_PLAYERS = 3
 
@@ -16,3 +18,11 @@ ROTATION_SPEED = 2.0
 DELTA_TIME     = 1.0 / FPS
 CONTACT_RADIUS = 2.0
 LINE_WIDTH     = 5
+
+PLAYERS_COLORS = [WHITE, RED, ORANGE, GREEN, BLUE]
+
+ROTATION_KEYS = [
+    [pygame.K_z, pygame.K_a],
+    [pygame.K_m, pygame.K_k],
+    [pygame.K_v, pygame.K_b]
+]

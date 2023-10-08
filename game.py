@@ -1,33 +1,55 @@
 import pygame
-from physics import updated_visited, init_random_velocities, init_random_positions, update_position, update_velocity, has_crashed
-from constants import GREEN, LINE_WIDTH, WHITE, RED, ORANGE, FPS, HEIGHT, WIDTH, SPEED, ROTATION_SPEED, DELTA_TIME, CONTACT_RADIUS
+
+from physics import \
+    updated_visited, \
+    init_random_velocities, \
+    init_random_positions, \
+    update_position, \
+    update_velocity, \
+    update_is_alive
+
+from constants import \
+    LINE_WIDTH, \
+    FPS, \
+    HEIGHT, \
+    WIDTH, \
+    SPEED, \
+    ROTATION_SPEED, \
+    DELTA_TIME, \
+    ROTATION_KEYS, \
+    PLAYERS_COLORS
+
 from menu import menu
 
 def draw_line(screen, p1, p2, color):
     pygame.draw.line(screen, color, p1, p2, LINE_WIDTH)
 
-def update_players_parameters(screen, keys, positions, velocities, visited):
+def compute_new_positions_and_velocities(positions, velocities, is_alive):
+    keys = pygame.key.get_pressed()
+
+    new_positions = []
+    new_velocities = []
+
     for player in range(len(positions)):
-        if is_alive[player]:
-            direction = None
-            [cw_key, acw_key] = rotation_keys[player]
+        direction = None
+        [cw_key, acw_key] = ROTATION_KEYS[player]
 
-            if keys[cw_key]:
-                direction = 'CLOCKWISE'
-            elif keys[acw_key]:
-                direction = 'ANTI-CLOCKWISE'
-
-            old_position = positions[player]
-            old_velocity = velocities[player]
-
-            positions[player] = update_position(old_position, old_velocity, DELTA_TIME)
-            velocities[player] = update_velocity(old_velocity, direction, ROTATION_SPEED, DELTA_TIME)
-
-            draw_line(screen, old_position, positions[player], colors[player])
+        if keys[cw_key]:
+            direction = 'CLOCKWISE'
+        elif keys[acw_key]:
+            direction = 'ANTI-CLOCKWISE'
         
-            is_alive[player] = False if has_crashed(positions[player], visited, WIDTH, HEIGHT) else True
+        new_positions.append(update_position(positions[player], velocities[player], DELTA_TIME))
 
-    return positions, velocities, is_alive
+        if is_alive[player]:
+            new_velocities.append(update_velocity(velocities[player], direction, ROTATION_SPEED, DELTA_TIME))
+        else:
+            new_velocities.append([0.0, 0.0])
+
+    assert(len(positions) == len(new_positions))
+    assert(len(velocities) == len(new_velocities))
+
+    return new_positions, new_velocities, is_alive
 
 def check_winner(is_alive):
     if is_alive.count(True) == 1:
@@ -36,29 +58,30 @@ def check_winner(is_alive):
                 return player
     return None
 
-def run_game(visited, positions, velocities):
-    running = True
+def draw_new_paths(screen, old_positions, new_positions):
+    assert(len(old_positions) == len(new_positions))
 
-    while running:
+    for player in range(len(old_positions)):
+        draw_line(screen, old_positions[player], new_positions[player], PLAYERS_COLORS[player])
+
+def run_game(positions, velocities, is_alive, visited):
+    while True:
         visited = updated_visited(visited, positions)
-
-        keys = pygame.key.get_pressed()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                return None
 
-        positions, velocities, is_alive = update_players_parameters(screen, keys, positions, velocities, visited)
+        new_positions, velocities, is_alive = compute_new_positions_and_velocities(positions, velocities, is_alive)
+
+        draw_new_paths(screen, positions, new_positions)
+
+        positions = new_positions
+        is_alive = update_is_alive(positions, visited, WIDTH, HEIGHT, is_alive)
 
         winner = check_winner(is_alive)
         if winner != None:
-            print("Winner", winner)
-            rect = pygame.draw.rect(screen, (GREEN), (0.25 * WIDTH, 0.4 * HEIGHT, 0.5 * WIDTH, 0.2 * HEIGHT), 2)
-            font = pygame.font.SysFont('Arial', 25)
-            screen.blit(font.render('Player '+ str(winner) + ' Won!', True, (255,0,0)), (0.25 * WIDTH + 0.1 * WIDTH, 0.4 * HEIGHT + 0.05 * HEIGHT))
-            pygame.display.flip()
-            running = False
-            pygame.time.delay(3000)
+            return winner
 
         # updates screen
         pygame.display.flip()
@@ -69,20 +92,14 @@ def run_game(visited, positions, velocities):
 pygame.init()
 
 pygame.display.set_caption("Achtung die Curve!")
+
+font = pygame.font.SysFont('freemono', 28)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-players = menu.show_players_counter(screen, clock)
+players = menu.show_players_counter(screen, clock, font)
 if players == None:
     exit()
-colors = [WHITE, RED, ORANGE]
-
-rotation_keys = [
-    [pygame.K_z, pygame.K_a],
-    [pygame.K_m, pygame.K_k],
-    [pygame.K_v, pygame.K_b]
-]
-
 
 while True:
     positions = init_random_positions(WIDTH, HEIGHT, players)
@@ -90,11 +107,11 @@ while True:
     is_alive = [True for _ in range(players)]
 
     visited = {}
-    run_game(visited, positions, velocities)
+    winner = run_game(positions, velocities, is_alive, visited)
+    if winner == None:
+        break
 
-    print("game finished")
-
-    if not menu.ask_for_continuation(screen, clock):
+    if not menu.show_winner(screen, clock, winner, font):
         break
 
 pygame.quit()

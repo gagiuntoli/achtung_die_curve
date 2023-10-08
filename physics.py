@@ -1,4 +1,5 @@
 import math
+
 from random import random
 from constants import CONTACT_RADIUS
 
@@ -14,7 +15,7 @@ def normalize_vector(vector, module):
     return [a * factor, b * factor]
 
 def init_random_velocities(players, module):
-    velocities = [[random(), random()] for _ in range(players)]
+    velocities = [[random() - 0.5, random() - 0.5] for _ in range(players)]
 
     for i in range(players):
         velocities[i] = normalize_vector(velocities[i], module)
@@ -59,8 +60,15 @@ def has_crashed(position, visited, width, height):
         if distance(vpoint, position) < CONTACT_RADIUS:
             return True
 
+def update_is_alive(positions, visited, width, height, is_alive):
+    for player in range(len(positions)):
+        if is_alive[player] == True and has_crashed(positions[player], visited, width, height):
+            is_alive[player] = False
+    return is_alive
+
 def updated_visited(visited, positions):
     for player in range(len(positions)):
         [x, y] = positions[player]
         visited[(x,y)] = True
+
     return visited
