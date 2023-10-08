@@ -1,28 +1,7 @@
 import pygame
 from physics import updated_visited, init_random_velocities, init_random_positions, update_position, update_velocity, has_crashed
 from constants import GREEN, LINE_WIDTH, WHITE, RED, ORANGE, FPS, HEIGHT, WIDTH, SPEED, ROTATION_SPEED, DELTA_TIME, CONTACT_RADIUS
-
-pygame.init()
-
-players = 2
-colors = [WHITE, RED, ORANGE]
-
-rotation_keys = [
-    [pygame.K_z, pygame.K_a],
-    [pygame.K_m, pygame.K_k],
-    [pygame.K_v, pygame.K_b]
-]
-
-positions = init_random_positions(WIDTH, HEIGHT, players)
-velocities = init_random_velocities(players, SPEED)
-is_alive = [True for _ in range(players)]
-
-visited = {}
-
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
-
-pygame.display.set_caption("Achtung die Curve!")
+from menu import menu
 
 def draw_line(screen, p1, p2, color):
     pygame.draw.line(screen, color, p1, p2, LINE_WIDTH)
@@ -81,10 +60,41 @@ def run_game(visited, positions, velocities):
             running = False
             pygame.time.delay(3000)
 
+        # updates screen
         pygame.display.flip()
 
         clock.tick(FPS)
 
-run_game(visited, positions, velocities)
+# Init game
+pygame.init()
+
+pygame.display.set_caption("Achtung die Curve!")
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+
+players = menu.show_players_counter(screen, clock)
+if players == None:
+    exit()
+colors = [WHITE, RED, ORANGE]
+
+rotation_keys = [
+    [pygame.K_z, pygame.K_a],
+    [pygame.K_m, pygame.K_k],
+    [pygame.K_v, pygame.K_b]
+]
+
+
+while True:
+    positions = init_random_positions(WIDTH, HEIGHT, players)
+    velocities = init_random_velocities(players, SPEED)
+    is_alive = [True for _ in range(players)]
+
+    visited = {}
+    run_game(visited, positions, velocities)
+
+    print("game finished")
+
+    if not menu.ask_for_continuation(screen, clock):
+        break
 
 pygame.quit()
