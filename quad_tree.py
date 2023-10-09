@@ -39,6 +39,14 @@ class quad_tree:
             
             return node
 
+    def get_height(self):
+        height = 1
+        node = self
+        while node.leaves != []:
+            height += 1
+            node = node.leaves[0]
+        return height
+
     def insert_point(self, point: [float, float]):
         node = self.get_node_for_point(point)
 
@@ -48,12 +56,22 @@ class quad_tree:
         else:
             return None
                 
-    def check_collision(self, point: [float, float], radius2):
-        node = self.get_node_for_point(point)
-        if node == None:
+    def check_collision(self, point: [float, float], radius: float):
+        [x, y] = point
+
+        possible_nodes = set()
+        for dx, dy in [[0.0, 0.0], [radius, 0.0], [-radius, 0.0], [0.0, radius], [0.0, -radius], [radius, radius], [radius, -radius], [-radius, radius], [-radius, -radius]]:
+            checkpoint = [x + dx, y + dy]
+            node = self.get_node_for_point(checkpoint)
+            if node != None:
+                possible_nodes.add(node)
+
+        if len(possible_nodes) == 0:
             return False
 
-        for vpoint in node.points:
-            if distance2(point, vpoint) < radius2:
-                return True
+        radius2 = radius**2
+        for node in possible_nodes:
+            for vpoint in node.points:
+                if distance2(point, vpoint) < radius2:
+                    return True
         return False

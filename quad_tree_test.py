@@ -17,11 +17,11 @@ def test_init_quad_tree():
 def test_insert_point():
     tree = quad_tree(2.0, 2.0, 1.0)
 
-    tree.insert_point([0.2, 0.1]) # -> 0
-    tree.insert_point([1.2, 0.1]) # -> 2
-    tree.insert_point([1.2, 1.1]) # -> 3
-    tree.insert_point([0.2, 1.1]) # -> 1
-    tree.insert_point([0.2, 1.2]) # -> 1
+    tree.insert_point([0.2, 0.1]) # -> leaf 0
+    tree.insert_point([1.2, 0.1]) # -> leaf 2
+    tree.insert_point([1.2, 1.1]) # -> leaf 3
+    tree.insert_point([0.2, 1.1]) # -> leaf 1
+    tree.insert_point([0.2, 1.2]) # -> leaf 1
 
     assert(tree.insert_point([0.2, 2.2]) == None)
     assert(tree.insert_point([-0.2, 2.2]) == None)
@@ -32,7 +32,7 @@ def test_insert_point():
     assert(tree.leaves[2].points == [[1.2, 0.1]])
     assert(tree.leaves[3].points == [[1.2, 1.1]])
 
-def test_insert_point():
+def test_check_collision():
     tree = quad_tree(2.0, 2.0, 1.0)
 
     tree.insert_point([0.2, 0.1]) # -> 0
@@ -47,5 +47,17 @@ def test_insert_point():
     assert(tree.check_collision([1.2, 1.1], 1.0e-10) == True)
     assert(tree.check_collision([0.2, 1.1], 1.0e-10) == True)
     assert(tree.check_collision([0.2, 1.2], 1.0e-10) == True)
-    assert(tree.check_collision([0.21, 1.21], 1.0e-2) == True)
+    assert(tree.check_collision([0.21, 1.21], 1.0e-1) == True)
     assert(tree.check_collision([0.21, 1.21], 1.0e-4) == False)
+
+def test_check_collision_when_point_is_in_border():
+    tree = quad_tree(2.0, 2.0, 1.0)
+
+    tree.insert_point([1.00001, 0.99999]) # -> 2
+
+    assert(tree.leaves[2].points == [[1.00001, 0.99999]]) # leaf 2
+
+    assert(tree.check_collision([0.99999, 0.99999], 1.0e-1) == True) # leaf 0
+    assert(tree.check_collision([0.99999, 1.00001], 1.0e-1) == True) # leaf 1
+    assert(tree.check_collision([1.00006, 0.99999], 1.0e-1) == True) # leaf 2
+    assert(tree.check_collision([1.00006, 1.00001], 1.0e-1) == True) # leaf 3

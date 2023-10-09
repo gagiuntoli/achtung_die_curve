@@ -52,25 +52,3 @@ def update_velocity(velocity, direction, rotation_speed, dt):
         angle = 0.0
 
     return rotate_vector(velocity, angle)
-
-def has_crashed(position, visited, radius, width, height):
-    [x, y] = position
-    if x < 0 or x > width or y < 0 or y > height:
-        return True
-
-    for vpoint in visited.keys():
-        if distance2(vpoint, position) < radius:
-            return True
-
-def update_actives(positions, visited, radius, width, height, actives):
-    for player in range(len(positions)):
-        if actives[player] == True and has_crashed(positions[player], visited, radius, width, height):
-            actives[player] = False
-    return actives
-
-def updated_visited(visited, positions):
-    for player in range(len(positions)):
-        [x, y] = positions[player]
-        visited[(x,y)] = True
-
-    return visited

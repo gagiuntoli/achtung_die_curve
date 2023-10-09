@@ -1,13 +1,13 @@
 import pygame
 
+from quad_tree import quad_tree
+
 from physics import \
-    updated_visited, \
     init_random_velocities, \
     init_random_positions, \
     init_actives, \
     update_position, \
-    update_velocity, \
-    update_actives
+    update_velocity
 
 from constants import \
     LINE_WIDTH, \
@@ -66,9 +66,24 @@ def draw_new_paths(screen, old_positions, new_positions):
     for player in range(len(old_positions)):
         draw_line(screen, old_positions[player], new_positions[player], PLAYERS_COLORS[player])
 
-def run_game(positions, velocities, actives, visited):
+def has_crashed(position, visited_tree: quad_tree, radius):
+    [x, y] = position
+    return x < 0 or y < 0 or x > WIDTH or y > HEIGHT or visited_tree.check_collision(position, radius)
+
+def update_actives(positions, visited_tree: quad_tree, radius, actives):
+    for player in range(len(positions)):
+        if actives[player] == True and has_crashed(positions[player], visited_tree, radius):
+            actives[player] = False
+    return actives
+
+def updated_visited_tree(visited_tree: quad_tree, positions):
+    for player in range(len(positions)):
+        visited_tree.insert_point(positions[player])
+    return visited_tree
+
+def run_game(positions, velocities, actives, visited_tree: quad_tree):
     while True:
-        visited = updated_visited(visited, positions)
+        visited_tree = updated_visited_tree(visited_tree, positions)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -79,7 +94,7 @@ def run_game(positions, velocities, actives, visited):
         draw_new_paths(screen, positions, new_positions)
 
         positions = new_positions
-        actives = update_actives(positions, visited, CONTACT_RADIUS, WIDTH, HEIGHT, actives)
+        actives = update_actives(positions, visited_tree, CONTACT_RADIUS, actives)
 
         winner = check_winner(actives)
         if winner != None:
@@ -110,8 +125,8 @@ while True:
     velocities = init_random_velocities(num_of_players, SPEED)
     actives = init_actives(num_of_players)
 
-    visited = {}
-    winner = run_game(positions, velocities, actives, visited)
+    visited_tree = quad_tree(WIDTH, HEIGHT, min(WIDTH, HEIGHT) / 20.0)
+    winner = run_game(positions, velocities, actives, visited_tree)
     if winner == None:
         break
 
