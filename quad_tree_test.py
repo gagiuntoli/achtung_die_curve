@@ -50,14 +50,17 @@ def test_check_collision():
     assert tree.check_collision([0.2, 1.3], radius) == False
 
 def test_check_collision_when_point_is_in_border():
-    radius = 1.0e-3
+    radius = 1.0e-1
     tree = quad_tree([0.0, 2.0, 0.0, 2.0], 1.0, radius)
 
     tree.insert_point([1.00001, 0.99999]) # -> 2
 
-#    assert(tree.leaves[2].points == [[1.00001, 0.99999]]) # leaf 2
-#
-#    assert(tree.check_collision([0.99999, 0.99999], 1.0e-1) == True) # leaf 0
-#    assert(tree.check_collision([0.99999, 1.00001], 1.0e-1) == True) # leaf 1
-#    assert(tree.check_collision([1.00006, 0.99999], 1.0e-1) == True) # leaf 2
-#    assert(tree.check_collision([1.00006, 1.00001], 1.0e-1) == True) # leaf 3
+    assert tree.leaves[0].points == [[1.00001, 0.99999]] # leaf 0
+    assert tree.leaves[1].points == [[1.00001, 0.99999]] # leaf 1
+    assert tree.leaves[2].points == [[1.00001, 0.99999]] # leaf 2
+    assert tree.leaves[3].points == [[1.00001, 0.99999]] # leaf 3
+
+    assert tree.check_collision([0.99999, 0.99999], radius) == True # leaf 0
+    assert tree.check_collision([0.99999, 1.00001], radius) == True # leaf 1
+    assert tree.check_collision([1.00006, 0.99999], radius) == True # leaf 2
+    assert tree.check_collision([1.00006, 1.00001], radius) == True # leaf 3

@@ -6,7 +6,9 @@ class quad_tree:
         self.leaves = []
         self.points = []
         self.rectangle = rectangle
+
         [xmin, xmax, ymin, ymax] = rectangle
+
         self.rectangle_extended = [xmin - radius, xmax + radius, ymin - radius, ymax + radius]
 
         width = xmax - xmin
@@ -16,10 +18,10 @@ class quad_tree:
         if min(width, height) > leaf_size:
             dx = width / 2.0
             dy = height / 2.0
-            self.leaves.append(quad_tree([xmin, xmax - dx, ymin, ymax - dy], leaf_size))
-            self.leaves.append(quad_tree([xmin, xmax - dx, ymin + dy, ymax], leaf_size))
-            self.leaves.append(quad_tree([xmin + dx, xmax, ymin, ymax - dy], leaf_size))
-            self.leaves.append(quad_tree([xmin + dx, xmax, ymin + dy, ymax], leaf_size))
+            self.leaves.append(quad_tree([xmin, xmax - dx, ymin, ymax - dy], leaf_size, radius))
+            self.leaves.append(quad_tree([xmin, xmax - dx, ymin + dy, ymax], leaf_size, radius))
+            self.leaves.append(quad_tree([xmin + dx, xmax, ymin, ymax - dy], leaf_size, radius))
+            self.leaves.append(quad_tree([xmin + dx, xmax, ymin + dy, ymax], leaf_size, radius))
 
     def get_node_for_point(self, point: [float, float]):
         if not is_point_in_rectangle(self.rectangle, point):
