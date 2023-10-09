@@ -76,14 +76,14 @@ def update_actives(positions, visited_tree: quad_tree, radius, actives):
             actives[player] = False
     return actives
 
-def updated_visited_tree(visited_tree: quad_tree, positions):
+def updated_visited_tree(visited_tree: quad_tree, positions, radius: float):
     for player in range(len(positions)):
         visited_tree.insert_point(positions[player])
     return visited_tree
 
 def run_game(positions, velocities, actives, visited_tree: quad_tree):
     while True:
-        visited_tree = updated_visited_tree(visited_tree, positions)
+        visited_tree = updated_visited_tree(visited_tree, positions, CONTACT_RADIUS)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -125,7 +125,7 @@ while True:
     velocities = init_random_velocities(num_of_players, SPEED)
     actives = init_actives(num_of_players)
 
-    visited_tree = quad_tree(WIDTH, HEIGHT, min(WIDTH, HEIGHT) / 20.0)
+    visited_tree = quad_tree([0, WIDTH, 0, HEIGHT], min(WIDTH, HEIGHT) / 20.0)
     winner = run_game(positions, velocities, actives, visited_tree)
     if winner == None:
         break

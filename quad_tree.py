@@ -1,43 +1,37 @@
 from physics import distance2
+from geometry import is_point_in_rectangle
 
 class quad_tree:
-    def __init__(self, width: float, height: float, leaf_size: float):
+    def __init__(self, rectangle: [float, float, float, float], leaf_size: float, radius: float = 0.0):
         self.leaves = []
         self.points = []
-        self.width = width
-        self.height = height
-        if width > leaf_size or height > leaf_size:
-            for _ in range(4):
-                self.leaves.append(quad_tree(width / 2, height / 2, leaf_size))
+        self.rectangle = rectangle
+        [xmin, xmax, ymin, ymax] = rectangle
+        self.rectangle_extended = [xmin - radius, xmax + radius, ymin - radius, ymax + radius]
+
+        width = xmax - xmin
+        height = ymax - ymin
+        assert width > 0 and height > 0, "Rectangle has invalid sizes"
+
+        if min(width, height) > leaf_size:
+            dx = width / 2.0
+            dy = height / 2.0
+            self.leaves.append(quad_tree([xmin, xmax - dx, ymin, ymax - dy], leaf_size))
+            self.leaves.append(quad_tree([xmin, xmax - dx, ymin + dy, ymax], leaf_size))
+            self.leaves.append(quad_tree([xmin + dx, xmax, ymin, ymax - dy], leaf_size))
+            self.leaves.append(quad_tree([xmin + dx, xmax, ymin + dy, ymax], leaf_size))
 
     def get_node_for_point(self, point: [float, float]):
-        [x, y] = point
-        if x < 0 or x > self.width or y < 0 or y > self.height:
+        if not is_point_in_rectangle(self.rectangle, point):
             return None
 
         node = self
-        xmin, xmax, dx = 0.0, node.width, node.width / 2.0
-        ymin, ymax, dy = 0.0, node.height, node.height / 2.0
 
         while node.leaves != []:
-            if x >= xmin and x <= xmax - dx and y >= ymin and y <= ymax - dy:
-                xmax -= dx
-                ymax -= dy
-                node = node.leaves[0]
-            elif x >= xmin and x <= xmax - dx and y >= ymin + dy and y <= ymax:
-                xmax -= dx
-                ymin += dy
-                node = node.leaves[1]
-            elif x >= xmin + dx and x <= xmax and y >= ymin and y <= ymax - dy:
-                xmin += dx
-                ymax -= dy
-                node = node.leaves[2]
-            elif x >= xmin + dx and x <= xmax and y >= ymin + dy and y <= ymax:
-                xmin += dx
-                ymin += dy
-                node = node.leaves[3]
-            
-            return node
+            for leaf in node.leaves:
+                if is_point_in_rectangle(leaf.rectangle, point):
+                    node = leaf
+        return node
 
     def get_height(self):
         height = 1
@@ -48,30 +42,24 @@ class quad_tree:
         return height
 
     def insert_point(self, point: [float, float]):
-        node = self.get_node_for_point(point)
-
-        if node != None:
-            node.points.append(point)
-            return True
+        if self.leaves == []:
+            if is_point_in_rectangle(self.rectangle_extended, point):
+                self.points.append(point)
+            else:
+                return None
         else:
-            return None
+            for node in self.leaves:
+                if is_point_in_rectangle(node.rectangle_extended, point):
+                    node.insert_point(point)
                 
     def check_collision(self, point: [float, float], radius: float):
-        [x, y] = point
+        node = self.get_node_for_point(point)
 
-        possible_nodes = set()
-        for dx, dy in [[0.0, 0.0], [radius, 0.0], [-radius, 0.0], [0.0, radius], [0.0, -radius], [radius, radius], [radius, -radius], [-radius, radius], [-radius, -radius]]:
-            checkpoint = [x + dx, y + dy]
-            node = self.get_node_for_point(checkpoint)
-            if node != None:
-                possible_nodes.add(node)
-
-        if len(possible_nodes) == 0:
+        if node == None:
             return False
 
         radius2 = radius**2
-        for node in possible_nodes:
-            for vpoint in node.points:
-                if distance2(point, vpoint) < radius2:
-                    return True
+        for vpoint in node.points:
+            if distance2(point, vpoint) < radius2:
+                return True
         return False
