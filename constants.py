@@ -11,11 +11,11 @@ RED    = (0xFF, 0x00, 0x00)
 GREEN  = (0xAA, 0xFF, 0x00)
 BLUE   = (0x00, 0x96, 0xFF)
 
-FPS            = 24
+FPS            = 48
 HEIGHT         = 900
 WIDTH          = 1100
-SPEED          = 70.0
-ROTATION_SPEED = 2.0
+SPEED          = 100.0
+ROTATION_SPEED = 4.0
 DELTA_TIME     = 1.0 / FPS
 CONTACT_RADIUS = 2.0
 LINE_WIDTH     = 5

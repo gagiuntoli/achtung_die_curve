@@ -1,5 +1,4 @@
-from physics import distance2
-from geometry import is_point_in_rectangle
+from geometry import is_point_in_rectangle, distance
 
 class quad_tree:
     def __init__(self, rectangle: [float, float, float, float], leaf_size: float, radius: float = 0.0):
@@ -60,8 +59,7 @@ class quad_tree:
         if node == None:
             return False
 
-        radius2 = radius**2
         for vpoint in node.points:
-            if distance2(point, vpoint) < radius2:
+            if distance(point, vpoint) < radius:
                 return True
         return False

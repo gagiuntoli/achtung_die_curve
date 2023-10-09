@@ -1,11 +1,5 @@
 import math
-
 from random import random
-
-def distance2(p1: [float, float], p2: [float, float]) -> float:
-    [x1, y1] = p1
-    [x2, y2] = p2
-    return (x2 - x1)**2 + (y2 - y1)**2
 
 def normalize_vector(vector, module):
     [a, b] = vector
@@ -15,10 +9,8 @@ def normalize_vector(vector, module):
 
 def init_random_velocities(players, module):
     velocities = [[random() - 0.5, random() - 0.5] for _ in range(players)]
-
     for i in range(players):
         velocities[i] = normalize_vector(velocities[i], module)
-
     return velocities
 
 def init_random_positions(width, height, players):
@@ -50,5 +42,4 @@ def update_velocity(velocity, direction, rotation_speed, dt):
         angle = -1 * rotation_speed * dt
     else:
         angle = 0.0
-
     return rotate_vector(velocity, angle)
