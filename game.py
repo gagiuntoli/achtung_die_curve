@@ -19,12 +19,11 @@ from constants import \
     DELTA_TIME, \
     ROTATION_KEYS, \
     PLAYERS_COLORS, \
-    CONTACT_RADIUS
+    CONTACT_RADIUS, \
+    SPACE_INTERVAL, \
+    SPACE_WIDTH
 
 from menu import menu
-
-def draw_line(screen, p1, p2, color):
-    pygame.draw.line(screen, color, p1, p2, LINE_WIDTH)
 
 def compute_new_positions_and_velocities(positions, velocities, actives):
     keys = pygame.key.get_pressed()
@@ -62,7 +61,7 @@ def check_winner(actives):
 
 def draw_new_paths(screen, old_positions, new_positions):
     for player in range(len(old_positions)):
-        draw_line(screen, old_positions[player], new_positions[player], PLAYERS_COLORS[player])
+        pygame.draw.line(screen, PLAYERS_COLORS[player], old_positions[player], new_positions[player], LINE_WIDTH)
 
 def has_crashed(position, visited_tree: quad_tree, radius):
     [x, y] = position
@@ -74,29 +73,32 @@ def update_actives(positions, visited_tree: quad_tree, radius, actives):
             actives[player] = False
     return actives
 
-def updated_visited_tree(visited_tree: quad_tree, positions, radius: float):
+def updated_visited_tree(visited_tree: quad_tree, positions):
     for player in range(len(positions)):
         visited_tree.insert_point(positions[player])
     return visited_tree
 
 def run_game(positions, velocities, actives, visited_tree: quad_tree):
+    distance = 0
     while True:
-        visited_tree = updated_visited_tree(visited_tree, positions, CONTACT_RADIUS)
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return None
 
         new_positions, velocities, actives = compute_new_positions_and_velocities(positions, velocities, actives)
 
-        draw_new_paths(screen, positions, new_positions)
+        if (distance % SPACE_INTERVAL) < SPACE_INTERVAL - SPACE_WIDTH:
+            visited_tree = updated_visited_tree(visited_tree, positions)
+            draw_new_paths(screen, positions, new_positions)
+            actives = update_actives(new_positions, visited_tree, CONTACT_RADIUS, actives)
 
         positions = new_positions
-        actives = update_actives(positions, visited_tree, CONTACT_RADIUS, actives)
 
         winner = check_winner(actives)
         if winner != None:
-            return winner
+            return winner, distance
+
+        distance += SPEED * DELTA_TIME
 
         pygame.display.flip()
         clock.tick(FPS)
@@ -125,11 +127,12 @@ while True:
     actives = init_actives(num_of_players)
 
     visited_tree = quad_tree([0, WIDTH, 0, HEIGHT], min(WIDTH, HEIGHT) / 20.0)
-    winner = run_game(positions, velocities, actives, visited_tree)
+    winner, distance = run_game(positions, velocities, actives, visited_tree)
+
     if winner == None:
         break
 
-    if not menu_obj.show_winner(players[winner]):
+    if not menu_obj.show_winner(players[winner], distance):
         break
 
 pygame.quit()

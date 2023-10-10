@@ -1,4 +1,3 @@
-import math
 from random import random
 
 from geometry import normalize_vector, rotate_vector
@@ -10,15 +9,10 @@ def init_random_velocities(players, module):
     return velocities
 
 def init_random_positions(width, height, players):
-    return [
-        [
-            0.25 * width + random() * width * 0.5,
-            0.25 * height + random() * height * 0.5
-        ] for _ in range(players)
-    ]
+    return [[ 0.25 * width + random() * width * 0.5, 0.25 * height + random() * height * 0.5 ] for _ in range(players)] 
 
 def init_actives(players):
-    return [True for _ in range(players)]
+    return [True] * players
 
 def update_position(position, velocity, dt):
     [x, y] = position
