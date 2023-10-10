@@ -1,11 +1,7 @@
 import math
 from random import random
 
-def normalize_vector(vector, module):
-    [a, b] = vector
-    old_module = math.sqrt(a**2 + b**2)
-    factor = module / old_module
-    return [a * factor, b * factor]
+from geometry import normalize_vector, rotate_vector
 
 def init_random_velocities(players, module):
     velocities = [[random() - 0.5, random() - 0.5] for _ in range(players)]
@@ -29,17 +25,8 @@ def update_position(position, velocity, dt):
     [vx, vy] = velocity
     return [x + dt * vx, y + dt * vy]
 
-def rotate_vector(vector, angle):
-    [x_old, y_old] = vector
-    x = x_old * math.cos(angle) - y_old * math.sin(angle)
-    y = x_old * math.sin(angle) + y_old * math.cos(angle)
-    return [x, y]
-    
 def update_velocity(velocity, direction, rotation_speed, dt):
-    if direction == 'CLOCKWISE':
-        angle = rotation_speed * dt
-    elif direction == 'ANTI-CLOCKWISE':
-        angle = -1 * rotation_speed * dt
-    else:
-        angle = 0.0
+    angle = rotation_speed * dt
+    if not direction:
+        angle *= -1
     return rotate_vector(velocity, angle)

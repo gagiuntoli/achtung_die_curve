@@ -33,23 +33,23 @@ def compute_new_positions_and_velocities(positions, velocities, actives):
     new_velocities = []
 
     for player in range(len(positions)):
-        direction = None
         [cw_key, acw_key] = ROTATION_KEYS[player]
 
+        direction = None
         if keys[cw_key]:
-            direction = 'CLOCKWISE'
+            direction = True
         elif keys[acw_key]:
-            direction = 'ANTI-CLOCKWISE'
+            direction = False
         
         new_positions.append(update_position(positions[player], velocities[player], DELTA_TIME))
 
         if actives[player]:
-            new_velocities.append(update_velocity(velocities[player], direction, ROTATION_SPEED, DELTA_TIME))
+            if direction != None:
+                new_velocities.append(update_velocity(velocities[player], direction, ROTATION_SPEED, DELTA_TIME))
+            else:
+                new_velocities.append(velocities[player])
         else:
             new_velocities.append([0.0, 0.0])
-
-    assert(len(positions) == len(new_positions))
-    assert(len(velocities) == len(new_velocities))
 
     return new_positions, new_velocities, actives
 
@@ -61,8 +61,6 @@ def check_winner(actives):
     return None
 
 def draw_new_paths(screen, old_positions, new_positions):
-    assert(len(old_positions) == len(new_positions))
-
     for player in range(len(old_positions)):
         draw_line(screen, old_positions[player], new_positions[player], PLAYERS_COLORS[player])
 
@@ -100,9 +98,7 @@ def run_game(positions, velocities, actives, visited_tree: quad_tree):
         if winner != None:
             return winner
 
-        # updates screen
         pygame.display.flip()
-
         clock.tick(FPS)
 
 # Init game
@@ -114,11 +110,14 @@ font = pygame.font.SysFont('freemono', size=28, bold=True)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-num_of_players = menu.show_players_counter(screen, clock, font)
+menu_obj = menu(screen, clock, font)
+
+num_of_players = menu_obj.show_players_counter()
 if num_of_players == None:
+    pygame.quit()
     exit()
 
-players = menu.select_player_names(screen, clock, font, num_of_players)
+players = menu_obj.select_player_names(num_of_players)
 
 while True:
     positions = init_random_positions(WIDTH, HEIGHT, num_of_players)
@@ -130,7 +129,7 @@ while True:
     if winner == None:
         break
 
-    if not menu.show_winner(screen, clock, players[winner], font):
+    if not menu_obj.show_winner(players[winner]):
         break
 
 pygame.quit()

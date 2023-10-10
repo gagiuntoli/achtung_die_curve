@@ -10,8 +10,7 @@ class quad_tree:
 
         self.rectangle_extended = [xmin - radius, xmax + radius, ymin - radius, ymax + radius]
 
-        width = xmax - xmin
-        height = ymax - ymin
+        width, height = xmax - xmin, ymax - ymin
         assert width > 0 and height > 0, "Rectangle has invalid sizes"
 
         if min(width, height) > leaf_size:
@@ -27,7 +26,6 @@ class quad_tree:
             return None
 
         node = self
-
         while node.leaves != []:
             for leaf in node.leaves:
                 if is_point_in_rectangle(leaf.rectangle, point):
@@ -55,7 +53,6 @@ class quad_tree:
                 
     def check_collision(self, point: [float, float], radius: float):
         node = self.get_node_for_point(point)
-
         if node == None:
             return False
 
