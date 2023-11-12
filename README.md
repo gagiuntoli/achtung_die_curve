@@ -13,7 +13,8 @@ $ python3 game.py
 Using a virtual environment:
 
 ```bash
-$ source env/bin/activate
-$ python -m pip install -r requirements.tx
-$ python game.py
+$ python3 -m venv .venv
+$ source .venv/bin/activate
+$ (.venv) python -m pip install -r requirements.tx
+$ (.venv) python game.py
 ```
