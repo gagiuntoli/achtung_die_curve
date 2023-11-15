@@ -2,6 +2,8 @@
 
 Remake of the classical game [Achtung, die Kurve!](https://en.wikipedia.org/wiki/Achtung,_die_Kurve!)
 
+![](./files/achtung_2.gif)
+
 # Run
 
 Using the dependencies on your machine (not guarantied to work)
